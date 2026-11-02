@@ -5,3 +5,5 @@ _screenshots/
 *.log
 .DS_Store
 .nodepod-check/
+site/
+.github/workflows/site.yaml
