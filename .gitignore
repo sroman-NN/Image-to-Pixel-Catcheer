@@ -6,4 +6,3 @@ _screenshots/
 .DS_Store
 .nodepod-check/
 site/
-.github/workflows/site.yaml

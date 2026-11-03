@@ -1,0 +1,87 @@
+name: build and release imgtopixel
+
+on:
+  workflow_dispatch: # boton para ejecutar en "Actions" 
+  schedule:
+    - cron: '0 0 * * 6' # alrededor de cada sabado a las 00:00 UTC
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps: #clonar el repo actual
+      - name: clonar el repo
+        uses: actions/checkout@v4
+        with: 
+          path: origen
+
+      - name: catcheer clone
+        uses: actions/checkout@v4
+        with:
+          repository: nzxy-dev/Catcheer
+          path: catcheer
+
+      - name: install dependencias de linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libwebkit2gtk-4.0-dev libgtk-3-dev
+
+      - name: copiar origen (linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd catcheer
+          rm -rf build/CMakeFiles build/Makefile build/CMakeCache.txt build/cmake_install.cmake
+          mkdir -p build/source
+          cp -r ../origen/* build/source/
+          chmod +x build.sh
+
+      - name: build linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd catcheer
+          chmod +x build.sh
+          ./build.sh
+
+      - name: copiar origen (windows)
+        if: matrix.os == 'windows-latest'
+        shell: cmd
+        run: |
+          cd catcheer
+          if exist build (
+            cd build
+            if exist CMakeFiles rmdir /s /q CMakeFiles
+            if exist Makefile del /f /q Makefile
+            if exist CMakeCache.txt del /f /q CMakeCache.txt
+            if exist cmake_install.cmake del /f /q cmake_install.cmake
+            cd ..
+          )
+          if not exist build\s-folder mkdir build\s-folder
+          xcopy /s /e /y ..\origen\* build\s-folder\
+
+      - name: build windows
+        if: matrix.os == 'windows-latest'
+        shell: cmd
+        run: |
+          cd catcheer
+          call build.bat
+
+      - name: generar nombre de version (tag)
+        id: date_version
+        run: echo "VERSION=build-$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_ENV
+        shell: bash
+
+      - name: upload a github releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: "Img-To-Px-Auto_release_with_catcheer - ${{ env.VERSION }}"
+          body: "compilacion auto completada"
+          files: |
+            catcheer/build/*
+
