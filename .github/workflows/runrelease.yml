@@ -77,6 +77,17 @@ jobs:
           del /f /q build\Makefile
 
 
+      - name: descargar dll webview 2para windows con nudget y copiar a build
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          # direccion de paquete nudget X64
+          Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2" -OutFile "webview2.zip"
+          Expand-Archive -Path "webview2.zip" -DestinationPath "webview2_extracted" -Force
+
+          # oopy dll
+          Copy-Item "webview2_extracted/runtimes/win-x64/native/WebView2Loader.dll" -Destination "catcheer/build/" -Force
+
       - name: generar nombre de version (tag)
         id: date_version
         run: echo "VERSION=build-$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_ENV
