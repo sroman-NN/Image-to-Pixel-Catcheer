@@ -69,7 +69,7 @@ jobs:
           cd catcheer
           call build_catcheer.bat
 
-          copy /y ..\origen\icon.ico build\
+          copy /y ..\origen\custom.ico build\
 
           rmdir /s /q build\CMakeFiles
           del /f /q build\CMakeCache.txt
