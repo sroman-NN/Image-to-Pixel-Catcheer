@@ -38,10 +38,9 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           cd catcheer
-          rm -rf build/CMakeFiles build/Makefile build/CMakeCache.txt build/cmake_install.cmake
+          rm -rf build
           mkdir -p build/source
           cp -r ../origen/* build/source/
-          chmod +x build.sh
 
       - name: build linux
         if: matrix.os == 'ubuntu-latest'
@@ -49,21 +48,16 @@ jobs:
           cd catcheer
           chmod +x build.sh
           ./build.sh
+          # rear zip
+          cd build && zip -r ../img-to-pixel-linux.zip * && cd ..
 
       - name: copiar origen (windows)
         if: matrix.os == 'windows-latest'
         shell: cmd
         run: |
           cd catcheer
-          if exist build (
-            cd build
-            if exist CMakeFiles rmdir /s /q CMakeFiles
-            if exist Makefile del /f /q Makefile
-            if exist CMakeCache.txt del /f /q CMakeCache.txt
-            if exist cmake_install.cmake del /f /q cmake_install.cmake
-            cd ..
-          )
-          if not exist build\s-folder mkdir build\s-folder
+          if exist build rmdir /s /q build
+          mkdir build\s-folder
           xcopy /s /e /y ..\origen\* build\s-folder\
 
       - name: build windows
@@ -78,6 +72,13 @@ jobs:
         run: echo "VERSION=build-$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_ENV
         shell: bash
 
+
+      - name: comprimir en powershell
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path catcheer/build/* -DestinationPath catcheer/img-to-pixel-windows.zip
+
       - name: upload a github releases
         uses: softprops/action-gh-release@v2
         with:
@@ -85,5 +86,5 @@ jobs:
           name: "Img-To-Px-Auto_release_with_catcheer - ${{ env.VERSION }}"
           body: "compilacion auto completada"
           files: |
-            catcheer/build/*
+            catcheer/*.zip
 
