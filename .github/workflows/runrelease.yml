@@ -49,7 +49,7 @@ jobs:
           chmod +x build.sh
           ./build.sh
           cp ../origen/icon.png build/
-          rm -rf build/CMakeFiles build/CMakeCache.txt build/cmake_install.cmake build/Makefile build/source
+          rm -rf build/CMakeFiles build/CMakeCache.txt build/cmake_install.cmake build/Makefile
           # rear zip
           cd build && zip -r ../img-to-pixel-linux.zip * && cd ..
 
